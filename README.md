@@ -1,30 +1,7 @@
 # AI Skincare Assistant
 
-A personalized AI-powered skincare assistant that connects to the Perplexity API to provide evidence-based skincare advice tailored to your specific skin profile.
+A personalized AI-powered skincare assistant that builds a 'medical chart' of the user, understanding their specific concerns and skin type. Connects to Perplexity API.
 
-## Features
-
-### 🤖 AI-Powered Skincare Advice
-- Connects to Perplexity API for real-time, evidence-based skincare recommendations
-- Professional dermatologist-level responses
-- Personalized product recommendations and routine suggestions
-
-### 📋 Medical Chart System
-- Automatically builds and maintains a comprehensive skin profile
-- Tracks skin type, concerns, allergies, and current products
-- Updates profile based on user interactions
-- Persistent storage of user data
-
-### 🎨 Beautiful Modern UI
-- Responsive design that works on desktop and mobile
-- Real-time chat interface
-- Visual skin profile display with categorized badges
-- Loading states and smooth animations
-
-### 🔒 Privacy & Security
-- Local data storage (no external database required)
-- Session management with localStorage
-- Secure API key handling
 
 ## Quick Start
 
