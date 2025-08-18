@@ -273,7 +273,33 @@ class SkincareAssistant {
                     <div class="flex flex-wrap gap-1">
                         ${this.medicalChart.lifestyleFactors.map(factor => 
                             `<span class="profile-badge">${this.capitalizeFirst(factor)}</span>`
-                        ).join('')}
+                        ).join("")}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Key Observations
+        if (this.medicalChart.observations && this.medicalChart.observations.length > 0) {
+            html += `
+                <div class="space-y-2">
+                    <h4 class="text-sm font-medium text-gray-700">Key Observations</h4>
+                    <div class="flex flex-wrap gap-1">
+                        ${this.medicalChart.observations.map(observation => 
+                            `<span class="profile-badge profile-badge-observation">${this.capitalizeFirst(observation)}</span>`
+                        ).join("")}
+                    </div>
+                </div>
+            `;
+        }
+
+        // AI Reasoning
+        if (this.medicalChart.reasoning) {
+            html += `
+                <div class="space-y-2">
+                    <h4 class="text-sm font-medium text-gray-700">AI Analysis</h4>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p class="text-sm text-blue-800">${this.medicalChart.reasoning}</p>
                     </div>
                 </div>
             `;

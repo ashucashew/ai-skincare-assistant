@@ -63,4 +63,6 @@
     .scrollbar-hide::-webkit-scrollbar {
         display: none;
     }
-} 
+}     .profile-badge-observation {
+        @apply bg-purple-100 text-purple-800;
+    }

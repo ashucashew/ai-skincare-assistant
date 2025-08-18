@@ -55,100 +55,15 @@ function initializeMedicalChart() {
     skinHistory: [],
     environmentalFactors: [],
     lifestyleFactors: [],
-    observations: [],
-    reasoning: "",
     lastUpdated: new Date().toISOString()
   };
 }
 
-// Update medical chart based on user input using AI reasoning
-async function updateMedicalChart(medicalChart, userInput) {
-  try {
-    // Use AI to intelligently analyze the user input and update the medical chart
-    const aiAnalysis = await analyzeUserInputWithAI(medicalChart, userInput);
-    const updatedChart = { ...medicalChart, ...aiAnalysis, lastUpdated: new Date().toISOString() };
-    return updatedChart;
-  } catch (error) {
-    console.error("Error updating medical chart with AI:", error);
-    // Fallback to basic keyword matching if AI fails
-    return fallbackUpdateMedicalChart(medicalChart, userInput);
-  }
-}
-
-// AI-powered analysis of user input
-async function analyzeUserInputWithAI(medicalChart, userInput) {
-  const currentProfile = generateMedicalChartSummary(medicalChart);
-  
-  const analysisPrompt = `You are a professional dermatologist analyzing patient skin observations. Based on the following patient information and their new observation, intelligently update their skin profile.
-
-CURRENT PATIENT PROFILE:
-${currentProfile}
-
-NEW PATIENT OBSERVATION: "${userInput}"
-
-Please analyze this observation and return ONLY a JSON object with the following structure, updating any relevant fields:
-{
-  "skinType": "string or null",
-  "skinConcerns": ["array of concerns"],
-  "allergies": ["array of allergies"],
-  "currentProducts": ["array of products"],
-  "environmentalFactors": ["array of environmental factors"],
-  "lifestyleFactors": ["array of lifestyle factors"],
-  "observations": ["array of key observations"],
-  "reasoning": "brief explanation of your analysis"
-}
-
-Examples of intelligent reasoning:
-- If patient says "my acne gets worse in summer" → skinType: "oily", environmentalFactors: ["summer heat"], reasoning: "Summer heat increases oil production"
-- If patient says "my skin feels more hydrated after shaving" → skinType: "dry", lifestyleFactors: ["shaving"], reasoning: "Shaving provides exfoliation, suggesting dry skin"
-- If patient says "I break out when I eat dairy" → allergies: ["dairy"], lifestyleFactors: ["diet"], reasoning: "Dairy sensitivity detected"
-
-Be intelligent and make logical connections. Only include fields that should be updated based on this observation.`;
-
-  const response = await axios.post(process.env.PERPLEXITY_API_URL, {
-    model: "sonar",
-    messages: [
-      {
-        role: "system",
-        content: "You are a professional dermatologist with expertise in skin analysis. Provide only valid JSON responses."
-      },
-      {
-        role: "user",
-        content: analysisPrompt
-      }
-    ],
-    max_tokens: 800,
-    temperature: 0.3
-  }, {
-    headers: {
-      "Authorization": `Bearer ${process.env.PERPLEXITY_API_KEY}`,
-      "Content-Type": "application/json"
-    }
-  });
-
-  const aiResponse = response.data.choices[0].message.content;
-  
-  try {
-    // Extract JSON from the response
-    const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const analysis = JSON.parse(jsonMatch[0]);
-      return analysis;
-    } else {
-      throw new Error("No valid JSON found in AI response");
-    }
-  } catch (parseError) {
-    console.error("Error parsing AI response:", parseError);
-    throw new Error("Failed to parse AI analysis");
-  }
-}
-
-// Fallback function using keyword matching
-function fallbackUpdateMedicalChart(medicalChart, userInput) {
+// Update medical chart based on user input
+function updateMedicalChart(medicalChart, userInput) {
   const updatedChart = { ...medicalChart };
-  const inputLower = userInput.toLowerCase();
   
-  // Basic keyword matching as fallback
+  // Extract skin type information
   const skinTypeKeywords = {
     'oily': ['oily', 'greasy', 'shiny', 'acne-prone'],
     'dry': ['dry', 'flaky', 'tight', 'rough'],
@@ -156,14 +71,55 @@ function fallbackUpdateMedicalChart(medicalChart, userInput) {
     'sensitive': ['sensitive', 'redness', 'irritation', 'burning'],
     'normal': ['normal', 'balanced', 'healthy']
   };
+
+  const inputLower = userInput.toLowerCase();
   
+  // Update skin type
   for (const [skinType, keywords] of Object.entries(skinTypeKeywords)) {
     if (keywords.some(keyword => inputLower.includes(keyword))) {
       updatedChart.skinType = skinType;
       break;
     }
   }
-  
+
+  // Extract skin concerns
+  const concernKeywords = {
+    'acne': ['acne', 'pimples', 'breakouts', 'zits'],
+    'aging': ['aging', 'wrinkles', 'fine lines', 'anti-aging'],
+    'hyperpigmentation': ['dark spots', 'hyperpigmentation', 'melasma', 'sun spots'],
+    'rosacea': ['rosacea', 'redness', 'flushing'],
+    'eczema': ['eczema', 'dermatitis', 'itchy'],
+    'dryness': ['dry', 'dehydrated', 'flaky'],
+    'sensitivity': ['sensitive', 'irritation', 'burning', 'stinging']
+  };
+
+  for (const [concern, keywords] of Object.entries(concernKeywords)) {
+    if (keywords.some(keyword => inputLower.includes(keyword)) && 
+        !updatedChart.skinConcerns.includes(concern)) {
+      updatedChart.skinConcerns.push(concern);
+    }
+  }
+
+  // Extract allergies
+  const allergyKeywords = ['allergic', 'allergy', 'reaction', 'break out'];
+  if (allergyKeywords.some(keyword => inputLower.includes(keyword))) {
+    // Extract potential allergens from the text
+    const allergenPatterns = [
+      /(?:allergic to|allergy to|reacts to)\s+([^.,]+)/gi,
+      /(?:can't use|cannot use|avoid)\s+([^.,]+)/gi
+    ];
+    
+    allergenPatterns.forEach(pattern => {
+      const matches = [...userInput.matchAll(pattern)];
+      matches.forEach(match => {
+        const allergen = match[1].trim().toLowerCase();
+        if (!updatedChart.allergies.includes(allergen)) {
+          updatedChart.allergies.push(allergen);
+        }
+      });
+    });
+  }
+
   updatedChart.lastUpdated = new Date().toISOString();
   return updatedChart;
 }
@@ -194,14 +150,6 @@ function generateMedicalChartSummary(medicalChart) {
   
   if (medicalChart.lifestyleFactors.length > 0) {
     summary += `- Lifestyle Factors: ${medicalChart.lifestyleFactors.join(', ')}\n`;
-  }
-  
-  if (medicalChart.observations && medicalChart.observations.length > 0) {
-    summary += `- Key Observations: ${medicalChart.observations.join(', ')}\n`;
-  }
-  
-  if (medicalChart.reasoning) {
-    summary += `- Analysis: ${medicalChart.reasoning}\n`;
   }
   
   return summary;
@@ -279,7 +227,7 @@ app.post('/api/session', (req, res) => {
 });
 
 // Update medical chart
-app.post('/api/update-chart', async (req, res) => {
+app.post('/api/update-chart', (req, res) => {
   const { userId, userInput } = req.body;
   
   if (!userId || !userInput) {
@@ -291,16 +239,11 @@ app.post('/api/update-chart', async (req, res) => {
     return res.status(404).json({ error: 'User not found' });
   }
   
-  try {
-    const updatedChart = await updateMedicalChart(users[userId], userInput);
-    users[userId] = updatedChart;
-    saveUsers(users);
-    
-    res.json({ medicalChart: updatedChart });
-  } catch (error) {
-    console.error('Error updating medical chart:', error);
-    res.status(500).json({ error: 'Failed to update medical chart' });
-  }
+  const updatedChart = updateMedicalChart(users[userId], userInput);
+  users[userId] = updatedChart;
+  saveUsers(users);
+  
+  res.json({ medicalChart: updatedChart });
 });
 
 // Get skincare advice
