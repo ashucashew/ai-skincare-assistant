@@ -1,30 +1,7 @@
 # AI Skincare Assistant
 
-A personalized AI-powered skincare assistant that connects to the Perplexity API to provide evidence-based skincare advice tailored to your specific skin profile.
+A personalized AI-powered skincare assistant that builds a 'medical chart' of the user, understanding their specific concerns and skin type. Connects to Perplexity API.
 
-## Features
-
-### 🤖 AI-Powered Skincare Advice
-- Connects to Perplexity API for real-time, evidence-based skincare recommendations
-- Professional dermatologist-level responses
-- Personalized product recommendations and routine suggestions
-
-### 📋 Medical Chart System
-- Automatically builds and maintains a comprehensive skin profile
-- Tracks skin type, concerns, allergies, and current products
-- Updates profile based on user interactions
-- Persistent storage of user data
-
-### 🎨 Beautiful Modern UI
-- Responsive design that works on desktop and mobile
-- Real-time chat interface
-- Visual skin profile display with categorized badges
-- Loading states and smooth animations
-
-### 🔒 Privacy & Security
-- Local data storage (no external database required)
-- Session management with localStorage
-- Secure API key handling
 
 ## Quick Start
 
@@ -96,19 +73,6 @@ Every time you ask a question, the assistant:
 - `GET /api/chart/:userId` - Retrieve user's medical chart
 - `PUT /api/chart/:userId` - Update specific chart fields
 
-## Example Usage
-
-### Starting a Conversation
-```
-User: "I have oily skin and I'm dealing with acne breakouts"
-Assistant: [Updates medical chart with oily skin + acne concerns]
-Assistant: "Based on your oily, acne-prone skin, I recommend..."
-
-User: "I'm allergic to benzoyl peroxide"
-Assistant: [Updates medical chart with allergy information]
-Assistant: "Since you're allergic to benzoyl peroxide, here are alternative treatments..."
-```
-
 ### Profile Updates
 Use the "Quick Profile Update" section to directly update your skin profile:
 - "I live in a humid climate"
@@ -142,14 +106,6 @@ ai-skincare-assistant/
 - `npm run build:css` - Build Tailwind CSS
 - `npm run build` - Build CSS and watch for changes
 
-## Getting a Perplexity API Key
-
-1. Visit [Perplexity AI](https://www.perplexity.ai/)
-2. Sign up for an account
-3. Navigate to API settings
-4. Generate an API key
-5. Add the key to your `.env` file
-
 ## Customization
 
 ### Adding New Skin Types
@@ -171,40 +127,5 @@ const concernKeywords = {
 };
 ```
 
-### Styling
-- Modify `public/css/input.css` for custom styles
-- Update `tailwind.config.js` for theme customization
-- Edit `public/index.html` for layout changes
-
-## Troubleshooting
-
-### Common Issues
-
-**"Failed to get skincare advice"**
-- Check your Perplexity API key in `.env`
-- Verify your internet connection
-- Ensure the API key has sufficient credits
-
-**CSS not loading**
-- Run `npm run build:css` to generate the CSS file
-- Check that `public/css/output.css` exists
-
-**Data not persisting**
-- Ensure the `data/` directory exists
-- Check file permissions for `data/users.json`
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file for details
-
 ## Disclaimer
-
 This application provides general skincare advice and should not replace professional medical consultation. Always consult with a dermatologist for serious skin concerns or before starting new treatments. 
